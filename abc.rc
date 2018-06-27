@@ -62,7 +62,8 @@ alias ra read_aiger
 alias r3 retime -M 3
 alias r3f retime -M 3 -f
 alias r3b retime -M 3 -b
-alias ren renode
+alias re read_eqn
+alias ra read_aiger
 alias rh read_hie
 alias ri read_init
 alias rl read_blif
@@ -82,7 +83,7 @@ alias rw rewrite
 alias rwz rewrite -z
 alias rf refactor
 alias rfz refactor -z
-alias re restructure
+#alias re restructure
 alias rez restructure -z
 alias rs resub
 alias rsz resub -z

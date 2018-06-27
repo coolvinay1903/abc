@@ -1,0 +1,5 @@
+# Equations for "network1" written by ABC on Thu May 17 11:52:27 2018
+INORDER = a b c d;
+OUTORDER = p;
+p = 1;
+

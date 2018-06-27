@@ -52,7 +52,7 @@ endif
 
 ARCHFLAGS := $(ARCHFLAGS)
 
-OPTFLAGS  ?= -g -O
+OPTFLAGS  ?= -g
 
 CFLAGS    += -Wall -Wno-unused-function -Wno-write-strings -Wno-sign-compare $(ARCHFLAGS)
 ifneq ($(findstring arm,$(shell uname -m)),)
@@ -143,7 +143,7 @@ ifneq ($(findstring Darwin, $(shell uname)), Darwin)
    LIBS += -lrt
 endif
 
-ifdef ABC_USE_LIBSTDCXX
+ifndef ABC_USE_NO_LIBSTDCXX
    LIBS += -lstdc++
    $(info $(MSG_PREFIX)Using explicit -lstdc++)
 endif

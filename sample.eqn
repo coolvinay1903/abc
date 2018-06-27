@@ -1,0 +1,14 @@
+# Equations for "child" written by ABC on Tue May 29 13:03:17 2018
+INORDER = pi00 pi01 pi02 pi03 pi04 pi05 pi06 pi07 pi08;
+OUTORDER = po0 po1 po2;
+temp1 = pi00 * pi01;
+temp2 = pi03 * temp1;
+temp3 = pi04 + pi05;
+temp4 = pi06 + temp3;
+temp5 = pi07 + pi08;
+temp6 = temp4 + temp5;
+temp7 = !temp1 + !temp2;
+temp8 = !temp3 * !temp4;
+po0 = temp7 * temp8;
+po1 = !temp7;
+po2 = !temp2;

@@ -155,6 +155,7 @@ static int Abc_CommandTwoExact               ( Abc_Frame_t * pAbc, int argc, cha
 static int Abc_CommandLutExact               ( Abc_Frame_t * pAbc, int argc, char ** argv );
 static int Abc_CommandAllExact               ( Abc_Frame_t * pAbc, int argc, char ** argv );
 static int Abc_CommandTestExact              ( Abc_Frame_t * pAbc, int argc, char ** argv );
+static int Abc_CommandFaultEquiv             ( Abc_Frame_t * pAbc, int argc, char ** argv );
 
 static int Abc_CommandLogic                  ( Abc_Frame_t * pAbc, int argc, char ** argv );
 static int Abc_CommandComb                   ( Abc_Frame_t * pAbc, int argc, char ** argv );
@@ -848,6 +849,7 @@ void Abc_Init( Abc_Frame_t * pAbc )
     Cmd_CommandAdd( pAbc, "Exact synthesis", "allexact",   Abc_CommandAllExact,         0 );
     Cmd_CommandAdd( pAbc, "Exact synthesis", "testexact",  Abc_CommandTestExact,        0 );
 
+    Cmd_CommandAdd( pAbc, "Various",      "equiv_faults",  Abc_CommandFaultEquiv,       1 );
     Cmd_CommandAdd( pAbc, "Various",      "logic",         Abc_CommandLogic,            1 );
     Cmd_CommandAdd( pAbc, "Various",      "comb",          Abc_CommandComb,             1 );
     Cmd_CommandAdd( pAbc, "Various",      "miter",         Abc_CommandMiter,            1 );
@@ -8798,6 +8800,61 @@ int Abc_CommandLogic( Abc_Frame_t * pAbc, int argc, char ** argv )
 usage:
     Abc_Print( -2, "usage: logic [-h]\n" );
     Abc_Print( -2, "\t        transforms an AIG into a logic network with SOPs\n" );
+    Abc_Print( -2, "\t-h    : print the command usage\n");
+    return 1;
+}
+/**Function*************************************************************
+
+  Synopsis    []
+
+  Description []
+
+  SideEffects []
+
+  SeeAlso     []
+
+***********************************************************************/
+int Abc_CommandFaultEquiv( Abc_Frame_t * pAbc, int argc, char ** argv )
+{
+    Abc_Ntk_t * pNtk, * pNtkRes;
+    int c;
+    int fVerbose = 0;
+    pNtk = Abc_FrameReadNtk(pAbc);
+    // set defaults
+    Extra_UtilGetoptReset();
+    while ( ( c = Extra_UtilGetopt( argc, argv, "vh" ) ) != EOF )
+    {
+        switch ( c )
+        {
+            case 'v':
+                fVerbose = 1;
+                break;
+            case 'h':
+                goto usage;
+            default:
+                goto usage;
+        }
+    }
+
+    if ( pNtk == NULL )
+    {
+        Abc_Print( -1, "Empty network.\n" );
+        return 1;
+    }
+
+    if ( !Abc_NtkIsMappedLogic( pNtk ) )
+    {
+        Abc_Print( -1, "This command is only applicable to mapped networks.\n" );
+        return 1;
+    }
+
+    Abc_NtkDfsReverse_prop(pNtk, fVerbose); // get the new network
+    return 0;
+
+usage:
+    Abc_Print( -2, "usage: equiv_faults [-vh]\n" );
+    Abc_Print( -2, "\t        Collapses stuck at faults and finds dominant fault relationship\n" );
+    Abc_Print( -2, "\t-v    : prints verbose information\n");
     Abc_Print( -2, "\t-h    : print the command usage\n");
     return 1;
 }
