@@ -11,7 +11,7 @@ using std::string;
 ABC_NAMESPACE_IMPL_START
 
 struct            FaultInfo;
-static const long NumCos = 100;
+static const long NumCos = 600000;
 static bool       debug  = 0;
 
 typedef std::set<Abc_Obj_t*>              ListOfNodes;
