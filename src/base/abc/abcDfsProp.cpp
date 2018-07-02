@@ -226,6 +226,8 @@ FaultInfo* FaultCollapse::genFaultInfoPI(Abc_Obj_t* pNode) {
     }
     Abc_ObjForEachFanin( pNode, pFanin, i ) {
         FaultInfo *f = getFaultInfo_PI(pFanin);
+        if (f == NULL) continue;
+        
         if (!invProp) {
             if (canPropOne)
                 F.AddToSA1Info(&f->SA1);
@@ -250,6 +252,7 @@ FaultInfo* FaultCollapse::genFaultInfoPO(Abc_Obj_t* pNode) {
     FaultInfo F;
     Abc_ObjForEachFanout( pNode, pFanout, i ) {
         FaultInfo *f = getFaultInfo_PO(pFanout);
+        if (f == NULL) continue;
         GateType G = getGateType(pFanout);
         bool canPropOne = 0, canPropZero = 0, invProp = 0;
         switch (G) {
@@ -297,14 +300,30 @@ FaultInfo* FaultCollapse::getFaultInfo_PI(Abc_Obj_t* pNode) {
     if (mNodeFaultInfo_PI.find(pNode) != mNodeFaultInfo_PI.end() )
         return &mNodeFaultInfo_PI[pNode];
 
+    // if this node is already visited, skip
+    if ( Abc_NodeIsTravIdCurrent( pNode ) )
+        return NULL;
+    //Set the node as visited
+    Abc_NodeSetTravIdCurrent( pNode );
+
+    //Generate and return the infoOB
     return genFaultInfoPI(pNode);
 }
 
 FaultInfo* FaultCollapse::getFaultInfo_PO(Abc_Obj_t* pNode)
 {
+    // if already populated just return the info.
     if (mNodeFaultInfo_PO.find(pNode) != mNodeFaultInfo_PO.end() )
         return &mNodeFaultInfo_PO[pNode];
 
+    // if this node is already visited, skip
+    if ( Abc_NodeIsTravIdCurrent( pNode ) )
+        return NULL;
+
+    //Set the node as visited
+    Abc_NodeSetTravIdCurrent( pNode );
+
+    //Generate and return the info
     return genFaultInfoPO(pNode);
 }
 
@@ -743,6 +762,7 @@ void FaultCollapse::MergeRedundantPIFaultInfo(Abc_Ntk_t* pNtk, std::map<Abc_Obj_
     {
         temp.reset();
         FaultInfo *f = FaultCollapse::getFaultInfo_PO(pCi);
+        if (!f) continue;
         ListOfNodes::iterator iter, end;
         if (processSA1) {
             if (f->SA1.size() == 0) continue;
@@ -811,6 +831,7 @@ void FaultCollapse::MergeRedundantPIFaultInfo(Abc_Ntk_t* pNtk, std::map<Abc_Obj_
     for (ListOfDependentCis_t::iterator iter = ListOfDependentCis.begin(); iter != ListOfDependentCis.end(); ++iter ) {
         Abc_Obj_t* pCi = Abc_NtkCi(pNtk,iter->first);
         FaultInfo *f = FaultCollapse::getFaultInfo_PO(pCi);
+        if (!f) continue;
         fprintf (fp ,"PI %s\n",Abc_ObjName(pCi));
         if (debug) printf ("PI %s\n",Abc_ObjName(pCi));
         if (processSA1)
@@ -1010,10 +1031,12 @@ void Abc_NtkDfsReverse_prop ( Abc_Ntk_t * pNtk , int dbg )
     if (!fp) {
         printf ("Unable to open file %s.\n",filename);
     }
+    Abc_NtkIncrementTravId( pNtk );
     Abc_NtkForEachCo( pNtk, pObj, i )
     {
         if (debug) printf ("---> Start working on PO %s\n",Abc_ObjName(pObj));
         FaultInfo *f = FaultCollapse::getFaultInfo_PI(pObj);
+        if (!f) continue;
         if (debug) printf ("PO %s\n",Abc_ObjName(pObj));
         if (fp) fprintf (fp ,"PO %s\n",Abc_ObjName(pObj));
         f->dumpStuckAtInfo(fp);
@@ -1041,6 +1064,7 @@ void Abc_NtkDfsReverse_prop ( Abc_Ntk_t * pNtk , int dbg )
     }
 */
     i = 0;
+    Abc_NtkIncrementTravId( pNtk );
     fprintf (fp, "****************************************\n");
     fprintf (fp, "********** Stuck at %s faults ********\n", "Zero");
     fprintf (fp, "****************************************\n");
@@ -1048,6 +1072,7 @@ void Abc_NtkDfsReverse_prop ( Abc_Ntk_t * pNtk , int dbg )
     {
         if (debug) printf ("---> Start working on PI %s\n",Abc_ObjName(pObj));
         FaultInfo *f = FaultCollapse::getFaultInfo_PO(pObj);
+        if (!f) continue;
         if (f->SA0.size() == 0) continue;
         if (debug) printf ("PI %s\n",Abc_ObjName(pObj));
         if (fp) fprintf (fp ,"PI %s\n",Abc_ObjName(pObj));
@@ -1062,6 +1087,7 @@ void Abc_NtkDfsReverse_prop ( Abc_Ntk_t * pNtk , int dbg )
     {
         if (debug) printf ("---> Start working on PI %s\n",Abc_ObjName(pObj));
         FaultInfo *f = FaultCollapse::getFaultInfo_PO(pObj);
+        if (!f) continue;
         if (f->SA1.size() == 0) continue;
         if (debug) printf ("PI %s\n",Abc_ObjName(pObj));
         if (fp) fprintf (fp ,"PI %s\n",Abc_ObjName(pObj));
